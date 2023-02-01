@@ -13,7 +13,13 @@ edition = "2018"
 exclude = ["benches/**"]
 
 [features]
-default = ["std", "opentype-layout", "apple-layout", "variable-fonts", "glyph-names"]
+default = [
+    "std",
+    "opentype-layout",
+    "apple-layout",
+    "variable-fonts",
+    "glyph-names",
+]
 std = []
 # Enables variable fonts support. Increases binary size almost twice.
 # Includes avar, CFF2, fvar, gvar, HVAR, MVAR and VVAR tables.
@@ -36,6 +42,14 @@ glyph-names = []
 gvar-alloc = ["std"]
 
 [dev-dependencies]
-base64 = "0.13"
+base64 = "0.21.0"
 pico-args = "0.5"
 xmlwriter = "0.1"
+
+serde = { version = "1.0.152", features = ["derive"] }
+serde_json = "1.0.91"
+
+graphics = { path = "../../GRAPHICS/graphics" }
+
+
+#serde = "1.0.152"
