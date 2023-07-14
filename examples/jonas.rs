@@ -8,8 +8,8 @@ const FONT_SIZE: f64 = 128.0;
 const COLUMNS: u32 = 10;
 
 fn main() {
-    let ttf_path = PathBuf::from("Avenir.ttf");
-    let svg_path = PathBuf::from("Avenir.svg");
+    let ttf_path = PathBuf::from("Merriweather-Regular.ttf");
+    let svg_path = PathBuf::from("Merriweather-Regular.svg");
     let font_data = std::fs::read(ttf_path).unwrap();
     let now = std::time::Instant::now();
 
@@ -61,7 +61,10 @@ fn main() {
     let mut row = 0;
     let mut column = 0;
 
+    let mut outbuffer = String::new();
+
     for id in 0..face.number_of_glyphs() {
+        // for id in 0..5 {
         let x = column as f64 * cell_size;
         let y = row as f64 * cell_size;
 
@@ -76,6 +79,7 @@ fn main() {
             scale,
             &mut svg,
             &mut path_buf,
+            &mut outbuffer,
         );
 
         column += 1;
@@ -88,6 +92,8 @@ fn main() {
     println!("Elapsed: {}ms", now.elapsed().as_micros() as f64 / 1000.0);
 
     std::fs::write(svg_path, &svg.end_document()).unwrap();
+
+    std::fs::write("./merriweather_regular/merriweather_Regular.rs", &outbuffer).unwrap();
 }
 
 fn draw_glyph(
@@ -99,6 +105,7 @@ fn draw_glyph(
     scale: f64,
     svg: &mut xmlwriter::XmlWriter,
     path_buf: &mut String,
+    outbuffer: &mut String,
 ) {
     path_buf.clear();
     if !path_buf.is_empty() {
@@ -137,22 +144,22 @@ fn draw_glyph(
     let mut builder = YBuilder(&mut v);
     face.outline_glyph(glyph_id, &mut builder);
 
-    let json = serde_json::to_string(builder.0).unwrap();
-    let filename = format!("./avenir/avenir-{}.json", glyph_id.0);
-    println!("- filename:{:?}", filename);
-    std::fs::write(filename, json).unwrap();
+    let str: String = format!(
+        "// pub const GEORGIA_{:?} : &'static [PathSegment] = &{:?}; \n\n",
+        glyph_id.0, builder.0
+    );
 
-    // let bbox_h = (bbox.y_max as f64 - bbox.y_min as f64) * scale;
-    // let bbox_x = x + dx + bbox.x_min as f64 * scale;
-    // let bbox_y = y - bbox.y_max as f64 * scale;
-    // svg.start_element("rect");
-    // svg.write_attribute("x", &bbox_x);
-    // svg.write_attribute("y", &bbox_y);
-    // svg.write_attribute("width", &bbox_w);
-    // svg.write_attribute("height", &bbox_h);
-    // svg.write_attribute("fill", "none");
-    // svg.write_attribute("stroke", "green");
-    // svg.end_element();
+    outbuffer.push_str(&str);
+
+    println!("{}", str);
+
+    // std::fs::write(format!("./georgia/georgia-{}.rs", glyph_id.0), &str)
+    //     .expect("Unable to write file");
+
+    // let json = serde_json::to_string(builder.0).unwrap();
+    // let filename = format!("./georgia/georgia-{}.json", glyph_id.0);
+    // println!("- filename:{:?}", filename);
+    // std::fs::write(filename, json).unwrap();
 }
 
 #[derive(Debug)]
